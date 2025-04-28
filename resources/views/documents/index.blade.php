@@ -13,7 +13,7 @@
             </div>
         @endif
 
-        <div class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white dark:bg-zinc-900 shadow-md rounded-lg overflow-visible">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
                 <thead class="bg-gray-50 dark:bg-zinc-800">
                     <tr>
@@ -29,18 +29,49 @@
                             <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $document->nombre }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-300">{{ $document->tipo_documento }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <form action="{{ route('documents.toggle-status', $document) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" 
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full cursor-pointer
-                                            {{ $document->estado === 'en_proceso' 
-                                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800' 
-                                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800' }}
-                                            transition-colors duration-200">
-                                        {{ $document->estado === 'en_proceso' ? 'En Proceso' : 'Cancelado' }}
-                                    </button>
-                                </form>
+                                <div class="relative" x-data="{ open: false }">
+                                    <div>
+                                        <button @click="open = !open" type="button" 
+                                                class="group inline-flex justify-between items-center w-40 px-4 py-2 text-sm rounded-md
+                                                {{ $document->estado === 'en_proceso' 
+                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' }}">
+                                            <span>{{ $document->estado === 'en_proceso' ? 'En Proceso' : 'Cancelado' }}</span>
+                                            <svg class="ml-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div x-show="open"
+                                         @click.away="open = false"
+                                         class="absolute z-[100] mt-1 w-40 rounded-md shadow-lg bg-white dark:bg-zinc-800 ring-1 ring-black ring-opacity-5"
+                                         style="position: fixed; transform: translateY(-50%);"
+                                         x-cloak>
+                                        <div class="py-1">
+                                            <form action="{{ route('documents.toggle-status', $document) }}" method="POST" class="block w-full">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="estado" value="en_proceso">
+                                                <button type="submit" 
+                                                        class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700
+                                                        {{ $document->estado === 'en_proceso' ? 'bg-green-50 dark:bg-green-900/50' : '' }}">
+                                                    En Proceso
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('documents.toggle-status', $document) }}" method="POST" class="block w-full">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="estado" value="cancelado">
+                                                <button type="submit" 
+                                                        class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-700
+                                                        {{ $document->estado === 'cancelado' ? 'bg-red-50 dark:bg-red-900/50' : '' }}">
+                                                    Cancelado
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="{{ route('documents.edit', $document) }}" 
@@ -63,4 +94,29 @@
             </table>
         </div>
     </div>
+
+    @push('scripts')
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('dropdown', (buttonId) => ({
+                open: false,
+                init() {
+                    this.$watch('open', (value) => {
+                        if (value) {
+                            const button = document.getElementById(buttonId);
+                            const rect = button.getBoundingClientRect();
+                            const dropdown = this.$refs.dropdown;
+                            dropdown.style.top = `${rect.top}px`;
+                            dropdown.style.left = `${rect.left}px`;
+                        }
+                    });
+                }
+            }));
+        });
+    </script>
+    @endpush
 </x-layouts.app> 

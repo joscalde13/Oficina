@@ -87,7 +87,7 @@ class DocumentController extends Controller
 
     public function toggleStatus(Document $document)
     {
-        $newStatus = $document->estado === 'en_proceso' ? 'cancelado' : 'en_proceso';
+        $newStatus = request('estado', $document->estado === 'en_proceso' ? 'cancelado' : 'en_proceso');
         $document->update(['estado' => $newStatus]);
 
         return redirect()->route('documents.index')
