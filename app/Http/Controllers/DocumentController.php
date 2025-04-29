@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Document;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DocumentController extends Controller
 {
@@ -92,5 +93,14 @@ class DocumentController extends Controller
 
         return redirect()->route('documents.index')
             ->with('success', 'Estado del documento actualizado exitosamente.');
+    }
+
+    public function exportPDF()
+    {
+        $documents = Document::all();
+        
+        $pdf = Pdf::loadView('documents.pdf', compact('documents'));
+        
+        return $pdf->download('documentos.pdf');
     }
 }

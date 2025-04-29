@@ -25,6 +25,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('documents', DocumentController::class);
     Route::patch('documents/{document}/toggle-status', [DocumentController::class, 'toggleStatus'])->name('documents.toggle-status');
+    Route::get('/documents/export-pdf', [DocumentController::class, 'exportPDF'])->name('documents.export-pdf');
 });
 
 require __DIR__.'/auth.php';
