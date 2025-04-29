@@ -5,7 +5,7 @@ use Livewire\Volt\Volt;
 use App\Http\Controllers\DocumentController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 })->name('home');
 
 Route::view('dashboard', 'dashboard')

@@ -20,20 +20,16 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
     public bool $remember = false;
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function login(): void
     {
         $this->validate();
-
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        if (!Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => __('auth.failed'),
+                'email' => __('Correo o contraseña incorrectos.'),
             ]);
         }
 
@@ -43,12 +39,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
 
-    /**
-     * Ensure the authentication request is not rate limited.
-     */
     protected function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -57,70 +50,77 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => __('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
-            ]),
+            'email' => __('Demasiados intentos. Intente nuevamente en :seconds segundos.', ['seconds' => $seconds]),
         ]);
     }
 
-    /**
-     * Get the authentication rate limiting throttle key.
-     */
     protected function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
+        return Str::transliterate(Str::lower($this->email) . '|' . request()->ip());
     }
-}; ?>
+};
+?>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<head>
+    @include('partials.head')
+</head>
+<body class="h-screen w-screen overflow-hidden bg-neutral-950 text-white">
 
-<div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+    <!-- Ahora todo el fondo es un solo lado -->
+    <div class="flex flex-col justify-center items-center h-full w-full p-8">
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+        <div class="w-full max-w-md">
+            <h1 class="text-4xl font-bold text-center mb-6">Bienvenido de nuevo</h1>
+            <p class="text-center text-gray-400 mb-8 text-sm">Por favor ingrese sus credenciales</p>
 
-    <form wire:submit="login" class="flex flex-col gap-6">
-        <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email address')"
-            type="email"
-            required
-            autofocus
-            autocomplete="email"
-            placeholder="email@example.com"
-        />
+            <form wire:submit="login" class="flex flex-col gap-6">
+                <!-- Email -->
+                <div>
+                    <label class="block text-sm mb-1">Correo electrónico</label>
+                    <input 
+                        type="email" 
+                        wire:model="email" 
+                        required 
+                        autofocus 
+                        placeholder="usuario@oficina.com"
+                        class="w-full rounded-md p-3 border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                </div>
 
-        <!-- Password -->
-        <div class="relative">
-            <flux:input
-                wire:model="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="current-password"
-                :placeholder="__('Password')"
-            />
+                <!-- Password -->
+                <div>
+                    <label class="block text-sm mb-1">Contraseña</label>
+                    <input 
+                        type="password" 
+                        wire:model="password" 
+                        required 
+                        placeholder="Ingrese su contraseña"
+                        class="w-full rounded-md p-3 border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                </div>
 
-            @if (Route::has('password.request'))
-                <flux:link class="absolute end-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </flux:link>
-            @endif
+             
+
+                <!-- Botón -->
+                <button 
+                    type="submit" 
+                    class="bg-indigo-600 hover:bg-indigo-700 rounded-md p-3 font-semibold text-white w-full transition"
+                >
+                    Ingresar
+                </button>
+            </form>
+
+          
+
+            <div class="text-center text-xs mt-2">
+                <span class="text-gray-400">¿No tiene cuenta?</span> 
+                <a href="{{ route('register') }}" class="hover:underline text-gray-400">Regístrese</a>
+            </div>
         </div>
 
-        <!-- Remember Me -->
-        <flux:checkbox wire:model="remember" :label="__('Remember me')" />
+    </div>
 
-        <div class="flex items-center justify-end">
-            <flux:button variant="primary" type="submit" class="w-full">{{ __('Log in') }}</flux:button>
-        </div>
-    </form>
-
-    @if (Route::has('register'))
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            {{ __('Don\'t have an account?') }}
-            <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
-        </div>
-    @endif
-</div>
+    @fluxScripts
+</body>
+</html>

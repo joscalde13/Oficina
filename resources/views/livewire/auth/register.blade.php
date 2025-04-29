@@ -35,63 +35,86 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<head>
+    @include('partials.head')
+</head>
+<body class="h-screen w-screen overflow-hidden bg-neutral-950 text-white">
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+    <div class="flex flex-col justify-center items-center h-full w-full p-8">
+        <div class="w-full max-w-md">
+            <h1 class="text-4xl font-bold text-center mb-6">Crear una cuenta</h1>
+            <p class="text-center text-gray-400 mb-8 text-sm">Ingrese sus datos para registrarse</p>
 
-    <form wire:submit="register" class="flex flex-col gap-6">
-        <!-- Name -->
-        <flux:input
-            wire:model="name"
-            :label="__('Name')"
-            type="text"
-            required
-            autofocus
-            autocomplete="name"
-            :placeholder="__('Full name')"
-        />
+            <form wire:submit="register" class="flex flex-col gap-6">
+                <!-- Nombre completo -->
+                <div>
+                    <label class="block text-sm mb-1">Nombre completo</label>
+                    <input 
+                        type="text" 
+                        wire:model="name" 
+                        required 
+                        autofocus 
+                        placeholder="Nombre completo"
+                        class="w-full rounded-md p-3 border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                </div>
 
-        <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email address')"
-            type="email"
-            required
-            autocomplete="email"
-            placeholder="email@example.com"
-        />
+                <!-- Correo electrónico -->
+                <div>
+                    <label class="block text-sm mb-1">Correo electrónico</label>
+                    <input 
+                        type="email" 
+                        wire:model="email" 
+                        required 
+                        placeholder="correo@ejemplo.com"
+                        class="w-full rounded-md p-3 border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                </div>
 
-        <!-- Password -->
-        <flux:input
-            wire:model="password"
-            :label="__('Password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('Password')"
-        />
+                <!-- Contraseña -->
+                <div>
+                    <label class="block text-sm mb-1">Contraseña</label>
+                    <input 
+                        type="password" 
+                        wire:model="password" 
+                        required 
+                        autocomplete="new-password"
+                        placeholder="Ingrese su contraseña"
+                        class="w-full rounded-md p-3 border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                </div>
 
-        <!-- Confirm Password -->
-        <flux:input
-            wire:model="password_confirmation"
-            :label="__('Confirm password')"
-            type="password"
-            required
-            autocomplete="new-password"
-            :placeholder="__('Confirm password')"
-        />
+                <!-- Confirmar contraseña -->
+                <div>
+                    <label class="block text-sm mb-1">Confirmar contraseña</label>
+                    <input 
+                        type="password" 
+                        wire:model="password_confirmation" 
+                        required 
+                        autocomplete="new-password"
+                        placeholder="Confirme su contraseña"
+                        class="w-full rounded-md p-3 border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    >
+                </div>
 
-        <div class="flex items-center justify-end">
-            <flux:button type="submit" variant="primary" class="w-full">
-                {{ __('Create account') }}
-            </flux:button>
+                <!-- Botón de crear cuenta -->
+                <button 
+                    type="submit" 
+                    class="bg-indigo-600 hover:bg-indigo-700 rounded-md p-3 font-semibold text-white w-full transition"
+                >
+                    Crear cuenta
+                </button>
+            </form>
+
+            <div class="text-center text-xs text-gray-400 mt-6">
+                ¿Ya tiene una cuenta?
+                <a href="{{ route('login') }}" class="hover:underline text-indigo-400">Iniciar sesión</a>
+            </div>
         </div>
-    </form>
-
-    <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-        {{ __('Already have an account?') }}
-        <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
     </div>
-</div>
+
+    @fluxScripts
+</body>
+</html>
